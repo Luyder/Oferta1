@@ -75,7 +75,7 @@ export function groupCourses(docs: RawDoc[]): CourseData[] {
         credits: d.credits ?? null,
         weeks: d.weeks ?? null,
         modality: d.modality ?? null,
-        description: d.description ?? null,
+        description: (d.description as Record<string, unknown>) ?? null,
         prerequisites: d.prerequisites ?? null,
         corequisites: d.corequisites ?? null,
         observations: d.observations ?? null,
