@@ -10,6 +10,7 @@ import { Media } from './src/collections/Media'
 import { Courses } from './src/collections/Courses'
 import { Professors } from './src/collections/Professors'
 import { Users } from './src/collections/Users'
+import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +41,8 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URI ?? `file:${path.resolve(dirname, 'db.sqlite')}`,
     },
+    // Run migrations automatically on startup in production (creates tables).
+    prodMigrations: migrations,
   }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'super-secret-change-in-production',
