@@ -4,19 +4,21 @@ export async function register() {
   // Payload's "push" (auto-create tables from the schema) only runs when
   // NODE_ENV !== 'production'. On Railway NODE_ENV is 'production', so the
   // tables never get created. We temporarily flip NODE_ENV while Payload
-  // connects so it pushes the schema, then restore it. This runs once at
-  // server startup, before any request is served.
-  const prev = process.env.NODE_ENV
+  // connects so it pushes the schema, then restore it.
+  //
+  // IMPORTANT: we access the env var via a computed key (not the literal
+  // `process.env.NODE_ENV`) so webpack's DefinePlugin doesn't statically
+  // replace it at build time, which would break compilation.
+  const envKey = ['NODE', 'ENV'].join('_')
+  const prev = process.env[envKey]
   try {
-    // @ts-expect-error NODE_ENV is writable at runtime
-    process.env.NODE_ENV = 'development'
+    process.env[envKey] = 'development'
     const { getPayload } = await import('payload')
     const { default: config } = await import('@payload-config')
     await getPayload({ config })
   } catch (e) {
     console.error('[instrumentation] Payload init/push error:', e)
   } finally {
-    // @ts-expect-error restore
-    process.env.NODE_ENV = prev
+    process.env[envKey] = prev
   }
 }
