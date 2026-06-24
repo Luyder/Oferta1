@@ -7,7 +7,7 @@ export type ProfessorData = {
   id: string | number
   name: string
   rank?: string | null
-  bio?: unknown
+  bio?: Record<string, unknown> | null
   photo?: { url?: string | null; alt?: string | null } | null
   courses: Array<{ id: string | number; title: string; code?: string | null; category: string; programType: string }>
 }
@@ -17,7 +17,7 @@ type Props = {
   onClose: () => void
 }
 
-function RichTextRenderer({ content }: { content: unknown }) {
+function RichTextRenderer({ content }: { content: Record<string, unknown> | null | undefined }) {
   if (!content || typeof content !== 'object') return null
   const root = (content as { root?: { children?: unknown[] } }).root
   if (!root?.children) return null

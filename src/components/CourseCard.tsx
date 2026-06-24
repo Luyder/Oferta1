@@ -20,7 +20,7 @@ export type CourseData = {
   credits?: number | null
   weeks?: number | null
   modality?: string | null
-  description?: unknown
+  description?: Record<string, unknown> | null
   prerequisites?: string | null
   corequisites?: string | null
   observations?: string | null

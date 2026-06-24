@@ -20,7 +20,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function RichTextRenderer({ content }: { content: unknown }) {
+function RichTextRenderer({ content }: { content: Record<string, unknown> | null | undefined }) {
   if (!content || typeof content !== 'object') return null
   const root = (content as { root?: { children?: unknown[] } }).root
   if (!root?.children) return null
