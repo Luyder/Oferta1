@@ -40,7 +40,6 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URI ?? `file:${path.resolve(dirname, 'db.sqlite')}`,
     },
-    push: false,
   }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET ?? 'super-secret-change-in-production',
