@@ -2,7 +2,7 @@
 buildCommand = "NODE_OPTIONS=--max-old-space-size=1536 npm ci && NODE_OPTIONS=--max-old-space-size=1536 npm run build"
 
 [deploy]
-startCommand = "DATA_DIR=\"${RAILWAY_VOLUME_MOUNT_PATH:-/tmp}\"; export DATABASE_URI=\"file://$DATA_DIR/db.sqlite\"; echo \"[start] Using DB at $DATABASE_URI\"; [ -f \"$DATA_DIR/db.sqlite\" ] || cp seed.sqlite \"$DATA_DIR/db.sqlite\"; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "DATA_DIR=\"${RAILWAY_VOLUME_MOUNT_PATH:-/tmp}\"; export DATABASE_URI=\"file://$DATA_DIR/db.sqlite\"; export MEDIA_DIR=\"$DATA_DIR/media\"; mkdir -p \"$MEDIA_DIR\"; echo \"[start] DB=$DATABASE_URI MEDIA=$MEDIA_DIR\"; [ -f \"$DATA_DIR/db.sqlite\" ] || cp seed.sqlite \"$DATA_DIR/db.sqlite\"; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
 healthcheckPath = "/"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"

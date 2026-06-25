@@ -5,7 +5,9 @@ export const Media: CollectionConfig = {
   labels: { singular: 'Imagen', plural: 'Imágenes' },
   access: { read: () => true },
   upload: {
-    staticDir: 'public/media',
+    // En producción (Railway) MEDIA_DIR apunta al volumen persistente
+    // para que las fotos sobrevivan a los redeploys. En local usa public/media.
+    staticDir: process.env.MEDIA_DIR || 'public/media',
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [
