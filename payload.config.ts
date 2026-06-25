@@ -1,6 +1,7 @@
 import { buildConfig } from 'payload'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
 import { es } from '@payloadcms/translations/languages/es'
 import { fileURLToPath } from 'url'
 import path from 'path'
@@ -37,6 +38,17 @@ export default buildConfig({
     },
   },
   collections: [Courses, Professors, Media, Users],
+  plugins: [
+    uploadthingStorage({
+      collections: {
+        media: true,
+      },
+      options: {
+        token: process.env.UPLOADTHING_TOKEN ?? '',
+        acl: 'public-read',
+      },
+    }),
+  ],
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI ?? `file:${path.resolve(dirname, 'db.sqlite')}`,
