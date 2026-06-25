@@ -65,8 +65,10 @@ export default function CourseCard({ course, onClick }: Props) {
         </h3>
       </div>
 
-      {/* Image area */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
+      {/* Image area — crece para llenar la altura de la tarjeta y evitar
+          espacios en blanco cuando las tarjetas de una fila tienen títulos
+          de distinta longitud. */}
+      <div className="relative min-h-[200px] flex-1 overflow-hidden bg-neutral-200">
         {imageUrl ? (
           <Image
             src={imageUrl}
