@@ -2,7 +2,7 @@
 buildCommand = "NODE_OPTIONS=--max-old-space-size=1536 npm ci && NODE_OPTIONS=--max-old-space-size=1536 npm run build"
 
 [deploy]
-startCommand = "mkdir -p /app/data/media && [ -f /app/data/db.sqlite ] || cp seed.sqlite /app/data/db.sqlite; rm -rf public/media && ln -sfn /app/data/media public/media; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "[ -f /tmp/db.sqlite ] || cp seed.sqlite /tmp/db.sqlite; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
 healthcheckPath = "/"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
@@ -13,4 +13,4 @@ value = "production"
 
 [[deploy.envVars]]
 name = "DATABASE_URI"
-value = "file:///app/data/db.sqlite"
+value = "file:///tmp/db.sqlite"
