@@ -26,6 +26,7 @@ export type CourseData = {
   observations?: string | null
   programRequirements?: Array<{ program: string; requirement: 'obligatoria' | 'electiva' }> | null
   active: boolean
+  subProgram?: string | null
   /** Todas las secciones (NRC + horario + profesor) de este curso */
   sections: CourseSection[]
   image?: {

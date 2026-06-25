@@ -2,7 +2,7 @@
 buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "npx next start -H 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "[ -f /tmp/db.sqlite ] || cp seed.sqlite /tmp/db.sqlite; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
 healthcheckPath = "/"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"

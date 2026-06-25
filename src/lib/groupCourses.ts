@@ -18,6 +18,7 @@ type RawDoc = {
   observations?: string | null
   programRequirements?: Array<{ program: string; requirement: string }> | null
   active?: boolean | null
+  subProgram?: string | null
   professor?: unknown
   image?: unknown
   order?: number | null
@@ -81,6 +82,7 @@ export function groupCourses(docs: RawDoc[]): CourseData[] {
         observations: d.observations ?? null,
         programRequirements: (d.programRequirements as CourseData['programRequirements']) ?? null,
         active: d.active ?? true,
+        subProgram: d.subProgram ?? null,
         sections: [section],
         image: extractImage(d),
       })
