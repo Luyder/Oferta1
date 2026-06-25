@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { requirementsForTrack } from '@/lib/requirements'
 
 export type ScheduleSlot = { day: string; startTime: string; endTime: string }
 
@@ -41,11 +42,19 @@ export type CourseData = {
 type Props = {
   course: CourseData
   onClick: (course: CourseData) => void
+  /** Pestaña de posgrado activa: resuelve obligatoria/electiva del programa correspondiente. */
+  track?: string
 }
 
-export default function CourseCard({ course, onClick }: Props) {
+export default function CourseCard({ course, onClick, track }: Props) {
   const imageUrl = course.image?.sizes?.card?.url ?? course.image?.url ?? null
   const badgeLabel = course.category === 'pregrado' ? 'PREGRADO' : 'POSGRADO'
+
+  // Obligatoria / electiva según el programa de la pestaña activa (solo posgrado).
+  const isPosgrado = ['MS', 'ESP', 'DOC'].includes(course.programType)
+  const requirements = isPosgrado
+    ? requirementsForTrack(course.programRequirements, track)
+    : []
 
   return (
     <button
@@ -80,6 +89,24 @@ export default function CourseCard({ course, onClick }: Props) {
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-neutral-200">
             <span className="font-mono text-xs text-neutral-400">Sin imagen</span>
+          </div>
+        )}
+
+        {/* Indicador obligatoria / electiva — siempre visible (solo posgrado) */}
+        {requirements.length > 0 && (
+          <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
+            {requirements.map((req) => (
+              <span
+                key={req}
+                className={`rounded-full px-2.5 py-1 font-display text-[11px] font-bold tracking-wider ${
+                  req === 'obligatoria'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-neutral-800 ring-1 ring-neutral-300'
+                }`}
+              >
+                {req === 'obligatoria' ? 'OBLIGATORIA' : 'ELECTIVA'}
+              </span>
+            ))}
           </div>
         )}
 

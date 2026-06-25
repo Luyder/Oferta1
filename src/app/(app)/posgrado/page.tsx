@@ -3,6 +3,7 @@ import config from '@payload-config'
 import PageHeader from '@/components/PageHeader'
 import PosgradoClient from '@/components/PosgradoClient'
 import { groupCourses } from '@/lib/groupCourses'
+import { belongsToTrackByRequirements } from '@/lib/requirements'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,11 +21,20 @@ export default async function PosgradoPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const all = groupCourses(docs as any[])
 
-  const msShared = all.filter(c => c.programType === 'MS' && ((c as any).subProgram === 'compartido' || !(c as any).subProgram))
-  const msProf   = [...all.filter(c => c.programType === 'MS' && (c as any).subProgram === 'profundizacion'), ...msShared]
-  const msInv    = [...all.filter(c => c.programType === 'MS' && (c as any).subProgram === 'investigacion'), ...msShared]
-  const esp      = all.filter(c => c.programType === 'ESP')
-  const doc      = all.filter(c => c.programType === 'DOC')
+  // Un curso MS pertenece a una pestaña si: su campo manual `subProgram` lo
+  // indica (o está sin etiquetar → aparece en ambas maestrías), O si su
+  // `programRequirements` menciona ese programa (ej: obligatoria en Investigación
+  // + electiva en Profundización → aparece en ambas con el indicador correcto).
+  const allMS = all.filter(c => c.programType === 'MS')
+  const inMaestria = (c: typeof all[number], trackKey: string, subVals: string[]) => {
+    const sp = (c as any).subProgram
+    const bySub = subVals.includes(sp) || !sp
+    return bySub || belongsToTrackByRequirements(c.programRequirements, trackKey)
+  }
+  const msProf = allMS.filter(c => inMaestria(c, 'profundizacion', ['profundizacion', 'compartido']))
+  const msInv  = allMS.filter(c => inMaestria(c, 'investigacion', ['investigacion', 'compartido']))
+  const esp    = all.filter(c => c.programType === 'ESP' || belongsToTrackByRequirements(c.programRequirements, 'esp'))
+  const doc    = all.filter(c => c.programType === 'DOC' || belongsToTrackByRequirements(c.programRequirements, 'doc'))
 
   type Section = { key: string; label: string; sublabel?: string; courses: typeof all; accent: string; dark: boolean }
   const sections: Section[] = ([
@@ -43,14 +53,6 @@ export default async function PosgradoPage() {
       courses: msInv,
       accent: 'bg-black',
       dark: true,
-    },
-    false && {
-      key: 'compartido',
-      label: 'Maestría',
-      sublabel: 'Cursos compartidos',
-      courses: msShared,
-      accent: 'bg-neutral-300',
-      dark: false,
     },
     // Fallback: if no MS courses are tagged yet, show them all together
     msProf.length === 0 && msInv.length === 0 && all.filter(c => c.programType === 'MS').length > 0 && {

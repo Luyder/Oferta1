@@ -3,11 +3,20 @@
 import { useMemo, useState } from 'react'
 import CourseCard, { type CourseData } from './CourseCard'
 import CourseDrawer from './CourseDrawer'
+import { requirementsForTrack } from '@/lib/requirements'
 
 type Props = {
   courses: CourseData[]
   /** Oculta la barra de filtros (modalidad + categorías). Por defecto se muestra. */
   showFilters?: boolean
+  /** Pestaña activa de posgrado (profundizacion/investigacion/esp/doc), para
+      resolver obligatoria/electiva según el programa correspondiente. */
+  track?: string
+}
+
+const REQUIREMENT_LABELS: Record<string, string> = {
+  obligatoria: 'Obligatoria',
+  electiva: 'Electiva',
 }
 
 const MODALITY_LABELS: Record<string, string> = {
@@ -16,10 +25,11 @@ const MODALITY_LABELS: Record<string, string> = {
   HÍBRIDA: 'Híbrida',
 }
 
-export default function CoursesGrid({ courses, showFilters = true }: Props) {
+export default function CoursesGrid({ courses, showFilters = true, track }: Props) {
   const [selected, setSelected] = useState<CourseData | null>(null)
   const [modality, setModality] = useState<string>('all')
   const [activeTopics, setActiveTopics] = useState<string[]>([])
+  const [requirement, setRequirement] = useState<string>('all')
 
   // Modalidades y categorías disponibles según los cursos presentes.
   const modalities = useMemo(() => {
@@ -34,6 +44,17 @@ export default function CoursesGrid({ courses, showFilters = true }: Props) {
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'))
   }, [courses])
 
+  // Obligatoria / electiva disponibles para la pestaña activa.
+  const requirements = useMemo(() => {
+    const set = new Set<string>()
+    for (const c of courses) {
+      for (const r of requirementsForTrack(c.programRequirements, track)) {
+        set.add(r)
+      }
+    }
+    return ['obligatoria', 'electiva'].filter((r) => set.has(r))
+  }, [courses, track])
+
   const toggleTopic = (t: string) =>
     setActiveTopics((prev) =>
       prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
@@ -45,11 +66,18 @@ export default function CoursesGrid({ courses, showFilters = true }: Props) {
       const ct = c.topics ?? []
       if (!activeTopics.some((t) => ct.includes(t))) return false
     }
+    if (requirement !== 'all') {
+      const reqs = requirementsForTrack(c.programRequirements, track)
+      if (!reqs.includes(requirement as 'obligatoria' | 'electiva')) return false
+    }
     return true
   })
 
-  const hasFilters = showFilters && (modalities.length > 0 || topics.length > 0)
-  const anyActive = modality !== 'all' || activeTopics.length > 0
+  const hasFilters =
+    showFilters &&
+    (modalities.length > 0 || topics.length > 0 || requirements.length > 0)
+  const anyActive =
+    modality !== 'all' || activeTopics.length > 0 || requirement !== 'all'
 
   return (
     <>
@@ -86,11 +114,30 @@ export default function CoursesGrid({ courses, showFilters = true }: Props) {
             </FilterRow>
           )}
 
+          {requirements.length > 0 && (
+            <FilterRow label="Tipo">
+              <Chip
+                label="Todos"
+                active={requirement === 'all'}
+                onClick={() => setRequirement('all')}
+              />
+              {requirements.map((r) => (
+                <Chip
+                  key={r}
+                  label={REQUIREMENT_LABELS[r] ?? r}
+                  active={requirement === r}
+                  onClick={() => setRequirement(requirement === r ? 'all' : r)}
+                />
+              ))}
+            </FilterRow>
+          )}
+
           {anyActive && (
             <button
               onClick={() => {
                 setModality('all')
                 setActiveTopics([])
+                setRequirement('all')
               }}
               className="font-mono text-xs uppercase tracking-widest text-neutral-400 underline-offset-4 hover:text-black hover:underline"
             >
@@ -107,7 +154,7 @@ export default function CoursesGrid({ courses, showFilters = true }: Props) {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((course) => (
-            <CourseCard key={course.id} course={course} onClick={setSelected} />
+            <CourseCard key={course.id} course={course} track={track} onClick={setSelected} />
           ))}
         </div>
       )}

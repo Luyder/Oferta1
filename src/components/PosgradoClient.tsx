@@ -63,7 +63,7 @@ export default function PosgradoClient({ sections }: { sections: Section[] }) {
               </p>
             </div>
           </div>
-          <CoursesGrid courses={current.courses} />
+          <CoursesGrid key={current.key} courses={current.courses} track={current.key} />
         </>
       )}
     </>
