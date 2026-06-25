@@ -67,6 +67,20 @@ export const Courses: CollectionConfig = {
         { label: 'DOC (Doctorado)', value: 'DOC' },
       ],
     },
+    {
+      name: 'subProgram',
+      type: 'select',
+      label: 'Track de maestría',
+      admin: {
+        description: 'Solo para cursos MS. Indica a qué track pertenece este curso.',
+        condition: (data) => data?.programType === 'MS',
+      },
+      options: [
+        { label: 'Profundización', value: 'profundizacion' },
+        { label: 'Investigación', value: 'investigacion' },
+        { label: 'Compartido (ambos tracks)', value: 'compartido' },
+      ],
+    },
     // --- Datos académicos ---
     {
       name: 'code',

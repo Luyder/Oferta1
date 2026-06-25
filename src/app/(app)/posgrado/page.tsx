@@ -3,8 +3,14 @@ import config from '@payload-config'
 import PageHeader from '@/components/PageHeader'
 import CoursesGrid from '@/components/CoursesGrid'
 import { groupCourses } from '@/lib/groupCourses'
+import type { CourseData } from '@/components/CourseCard'
 
 export const dynamic = 'force-dynamic'
+
+type RawCourse = {
+  subProgram?: string | null
+  [key: string]: unknown
+}
 
 export default async function PosgradoPage() {
   const payload = await getPayload({ config })
@@ -17,35 +23,120 @@ export default async function PosgradoPage() {
     depth: 2,
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const courses = groupCourses(docs as any[])
+  const all = groupCourses(docs as any[])
 
-  const filterOptions = [
-    { label: 'MS', value: 'MS' },
-    { label: 'ESP', value: 'ESP' },
-    { label: 'DOC', value: 'DOC' },
-  ]
+  // Split MS courses by subProgram; other programTypes stay together
+  const msProf    = all.filter(c => c.programType === 'MS' && (c as any).subProgram === 'profundizacion')
+  const msInv     = all.filter(c => c.programType === 'MS' && (c as any).subProgram === 'investigacion')
+  const msShared  = all.filter(c => c.programType === 'MS' && !(c as any).subProgram || c.programType === 'MS' && (c as any).subProgram === 'compartido')
+  const esp       = all.filter(c => c.programType === 'ESP')
+  const doc       = all.filter(c => c.programType === 'DOC')
+
+  const hasMSTracks = msProf.length > 0 || msInv.length > 0
 
   return (
     <div className="min-h-screen bg-white">
       <PageHeader activeTab="posgrado" />
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-8">
-          <h2 className="font-display text-2xl font-black tracking-tight">Posgrado</h2>
-          <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
-            {courses.length} {courses.length === 1 ? 'curso' : 'cursos'} · 2026-2
-          </p>
-        </div>
-        {courses.length === 0 ? (
-          <EmptyState />
+
+        {/* === MAESTRÍA === */}
+        {hasMSTracks ? (
+          <>
+            {/* Profundización */}
+            {msProf.length > 0 && (
+              <Section
+                title="Maestría en Educación"
+                subtitle="Profundización"
+                accent="bg-facu-green"
+                courses={msProf}
+              />
+            )}
+
+            {/* Investigación */}
+            {msInv.length > 0 && (
+              <Section
+                title="Maestría en Educación"
+                subtitle="Investigación"
+                accent="bg-black"
+                courses={msInv}
+                dark
+              />
+            )}
+
+            {/* Compartidos / sin etiquetar */}
+            {msShared.length > 0 && (
+              <Section
+                title="Maestría en Educación"
+                subtitle="Cursos compartidos"
+                accent="bg-neutral-300"
+                courses={msShared}
+              />
+            )}
+          </>
         ) : (
-          <CoursesGrid
-            courses={courses}
-            filterOptions={filterOptions}
-            filterKey="programType"
+          /* Fallback: show all MS together if none tagged yet */
+          all.filter(c => c.programType === 'MS').length > 0 && (
+            <Section
+              title="Maestría en Educación"
+              subtitle={`${all.filter(c => c.programType === 'MS').length} cursos`}
+              accent="bg-facu-green"
+              courses={all.filter(c => c.programType === 'MS')}
+            />
+          )
+        )}
+
+        {/* === ESPECIALIZACIÓN === */}
+        {esp.length > 0 && (
+          <Section
+            title="Especialización"
+            subtitle={`${esp.length} cursos`}
+            accent="bg-facu-green"
+            courses={esp}
           />
         )}
+
+        {/* === DOCTORADO === */}
+        {doc.length > 0 && (
+          <Section
+            title="Doctorado en Educación"
+            subtitle={`${doc.length} cursos`}
+            accent="bg-black"
+            courses={doc}
+            dark
+          />
+        )}
+
+        {all.length === 0 && <EmptyState />}
       </div>
+    </div>
+  )
+}
+
+function Section({
+  title,
+  subtitle,
+  accent,
+  courses,
+  dark = false,
+}: {
+  title: string
+  subtitle: string
+  accent: string
+  courses: CourseData[]
+  dark?: boolean
+}) {
+  return (
+    <div className="mb-14">
+      <div className="mb-6 flex items-end gap-4">
+        <div className={`h-8 w-1.5 rounded-full ${accent}`} />
+        <div>
+          <h2 className="font-display text-2xl font-black tracking-tight leading-none">{title}</h2>
+          <p className={`mt-1 font-mono text-xs uppercase tracking-widest ${dark ? 'text-black font-bold' : 'text-neutral-400'}`}>
+            {subtitle} · {courses.length} {courses.length === 1 ? 'curso' : 'cursos'}
+          </p>
+        </div>
+      </div>
+      <CoursesGrid courses={courses} />
     </div>
   )
 }
