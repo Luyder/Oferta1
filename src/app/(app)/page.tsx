@@ -54,12 +54,12 @@ export default function HomePage() {
         </nav>
 
         {/* Logo institucional */}
-        <div className="mt-16 flex justify-center sm:justify-start">
+        <div className="mt-16 flex justify-center sm:justify-end">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-faceduc.png"
             alt="Universidad de los Andes · Facultad de Educación · 10 años transformando la educación"
-            className="h-16 w-auto sm:h-20"
+            className="h-16 w-auto sm:h-20 invert"
           />
         </div>
       </div>
