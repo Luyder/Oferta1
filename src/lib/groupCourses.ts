@@ -19,9 +19,23 @@ type RawDoc = {
   programRequirements?: Array<{ program: string; requirement: string }> | null
   active?: boolean | null
   subProgram?: string | null
+  topics?: unknown
   professor?: unknown
   image?: unknown
   order?: number | null
+}
+
+function extractTopics(d: RawDoc): string[] {
+  const t = d.topics
+  if (!Array.isArray(t)) return []
+  return t
+    .map((item) => {
+      if (item && typeof item === 'object' && 'name' in item) {
+        return (item as { name?: string }).name ?? null
+      }
+      return null
+    })
+    .filter((x): x is string => Boolean(x))
 }
 
 function normTitle(t: string) {
@@ -83,6 +97,7 @@ export function groupCourses(docs: RawDoc[]): CourseData[] {
         programRequirements: (d.programRequirements as CourseData['programRequirements']) ?? null,
         active: d.active ?? true,
         subProgram: d.subProgram ?? null,
+        topics: extractTopics(d),
         sections: [section],
         image: extractImage(d),
       })

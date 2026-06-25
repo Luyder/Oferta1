@@ -81,6 +81,17 @@ export const Courses: CollectionConfig = {
         { label: 'Compartido (ambos tracks)', value: 'compartido' },
       ],
     },
+    {
+      name: 'topics',
+      type: 'relationship',
+      relationTo: 'categories',
+      hasMany: true,
+      label: 'Categorías temáticas',
+      admin: {
+        description:
+          'Etiquetas para que los estudiantes filtren cursos por interés. Crea y administra las categorías en la sección "Categorías".',
+      },
+    },
     // --- Datos académicos ---
     {
       name: 'code',

@@ -1,49 +1,108 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import CourseCard, { type CourseData } from './CourseCard'
 import CourseDrawer from './CourseDrawer'
 
 type Props = {
   courses: CourseData[]
-  filterOptions?: Array<{ label: string; value: string }>
-  filterKey?: keyof CourseData
+  /** Oculta la barra de filtros (modalidad + categorías). Por defecto se muestra. */
+  showFilters?: boolean
 }
 
-export default function CoursesGrid({ courses, filterOptions, filterKey }: Props) {
-  const [selected, setSelected] = useState<CourseData | null>(null)
-  const [activeFilter, setActiveFilter] = useState<string>('all')
+const MODALITY_LABELS: Record<string, string> = {
+  PRESENCIAL: 'Presencial',
+  VIRTUAL: 'Virtual',
+  HÍBRIDA: 'Híbrida',
+}
 
-  const filtered =
-    activeFilter === 'all' || !filterKey
-      ? courses
-      : courses.filter((c) => c[filterKey] === activeFilter)
+export default function CoursesGrid({ courses, showFilters = true }: Props) {
+  const [selected, setSelected] = useState<CourseData | null>(null)
+  const [modality, setModality] = useState<string>('all')
+  const [activeTopics, setActiveTopics] = useState<string[]>([])
+
+  // Modalidades y categorías disponibles según los cursos presentes.
+  const modalities = useMemo(() => {
+    const set = new Set<string>()
+    for (const c of courses) if (c.modality) set.add(c.modality)
+    return Array.from(set)
+  }, [courses])
+
+  const topics = useMemo(() => {
+    const set = new Set<string>()
+    for (const c of courses) for (const t of c.topics ?? []) set.add(t)
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'))
+  }, [courses])
+
+  const toggleTopic = (t: string) =>
+    setActiveTopics((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+    )
+
+  const filtered = courses.filter((c) => {
+    if (modality !== 'all' && c.modality !== modality) return false
+    if (activeTopics.length > 0) {
+      const ct = c.topics ?? []
+      if (!activeTopics.some((t) => ct.includes(t))) return false
+    }
+    return true
+  })
+
+  const hasFilters = showFilters && (modalities.length > 0 || topics.length > 0)
+  const anyActive = modality !== 'all' || activeTopics.length > 0
 
   return (
     <>
-      {/* Filter tabs */}
-      {filterOptions && filterOptions.length > 0 && (
-        <div className="scrollbar-hide mb-8 flex gap-2 overflow-x-auto pb-1">
-          <FilterButton
-            label="TODOS"
-            active={activeFilter === 'all'}
-            onClick={() => setActiveFilter('all')}
-          />
-          {filterOptions.map((opt) => (
-            <FilterButton
-              key={opt.value}
-              label={opt.label}
-              active={activeFilter === opt.value}
-              onClick={() => setActiveFilter(opt.value)}
-            />
-          ))}
+      {hasFilters && (
+        <div className="mb-8 space-y-3">
+          {modalities.length > 0 && (
+            <FilterRow label="Modalidad">
+              <Chip
+                label="Todas"
+                active={modality === 'all'}
+                onClick={() => setModality('all')}
+              />
+              {modalities.map((m) => (
+                <Chip
+                  key={m}
+                  label={MODALITY_LABELS[m] ?? m}
+                  active={modality === m}
+                  onClick={() => setModality(modality === m ? 'all' : m)}
+                />
+              ))}
+            </FilterRow>
+          )}
+
+          {topics.length > 0 && (
+            <FilterRow label="Categorías">
+              {topics.map((t) => (
+                <Chip
+                  key={t}
+                  label={t}
+                  active={activeTopics.includes(t)}
+                  onClick={() => toggleTopic(t)}
+                />
+              ))}
+            </FilterRow>
+          )}
+
+          {anyActive && (
+            <button
+              onClick={() => {
+                setModality('all')
+                setActiveTopics([])
+              }}
+              className="font-mono text-xs uppercase tracking-widest text-neutral-400 underline-offset-4 hover:text-black hover:underline"
+            >
+              Limpiar filtros ({filtered.length} de {courses.length})
+            </button>
+          )}
         </div>
       )}
 
-      {/* Grid */}
       {filtered.length === 0 ? (
         <p className="font-mono text-sm text-neutral-500">
-          No hay cursos en esta categoría.
+          No hay cursos que coincidan con los filtros.
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -53,13 +112,29 @@ export default function CoursesGrid({ courses, filterOptions, filterKey }: Props
         </div>
       )}
 
-      {/* Drawer */}
       <CourseDrawer course={selected} onClose={() => setSelected(null)} />
     </>
   )
 }
 
-function FilterButton({
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="mr-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+        {label}
+      </span>
+      {children}
+    </div>
+  )
+}
+
+function Chip({
   label,
   active,
   onClick,
@@ -71,10 +146,10 @@ function FilterButton({
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-5 py-2 font-display text-sm font-bold tracking-wide transition-colors ${
+      className={`shrink-0 rounded-full border px-4 py-1.5 font-display text-sm font-bold tracking-wide transition-colors ${
         active
-          ? 'border-black bg-black text-white'
-          : 'border-neutral-300 bg-white text-black hover:border-black'
+          ? 'border-facu-green bg-facu-green text-black'
+          : 'border-neutral-300 bg-white text-neutral-700 hover:border-black hover:text-black'
       }`}
     >
       {label}

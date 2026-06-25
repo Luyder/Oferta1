@@ -27,6 +27,8 @@ export type CourseData = {
   programRequirements?: Array<{ program: string; requirement: 'obligatoria' | 'electiva' }> | null
   active: boolean
   subProgram?: string | null
+  /** Nombres de las categorías temáticas asignadas (para filtrar) */
+  topics?: string[] | null
   /** Todas las secciones (NRC + horario + profesor) de este curso */
   sections: CourseSection[]
   image?: {
