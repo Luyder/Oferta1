@@ -40,6 +40,7 @@ export default buildConfig({
   collections: [Courses, Professors, Media, Users],
   plugins: [
     uploadthingStorage({
+      enabled: Boolean(process.env.UPLOADTHING_TOKEN),
       collections: {
         media: true,
       },
