@@ -1,5 +1,5 @@
 [build]
-buildCommand = "npm ci && npm run build"
+buildCommand = "NODE_OPTIONS=--max-old-space-size=1536 npm ci && NODE_OPTIONS=--max-old-space-size=1536 npm run build"
 
 [deploy]
 startCommand = "[ -f /tmp/db.sqlite ] || cp seed.sqlite /tmp/db.sqlite; npx next start -H 0.0.0.0 -p ${PORT:-3000}"
