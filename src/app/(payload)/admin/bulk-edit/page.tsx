@@ -2,6 +2,8 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import BulkEditClient, { type CourseGroup } from '@/components/admin/BulkEditClient'
 
+export const dynamic = 'force-dynamic'
+
 function normalize(s: string) {
   return s
     .normalize('NFD')
