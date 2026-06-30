@@ -17,7 +17,7 @@ export default async function BulkEditPage() {
   const { docs } = await payload.find({
     collection: 'courses',
     limit: 500,
-    depth: 0,
+    depth: 1,
   })
 
   // Group by titleNormalized
@@ -28,6 +28,7 @@ export default async function BulkEditPage() {
     const d = doc as any
     const tn: string = d.titleNormalized || normalize(d.title || '')
     if (!groupMap.has(tn)) {
+      const img = d.image && typeof d.image === 'object' ? d.image : null
       groupMap.set(tn, {
         titleNormalized: tn,
         title: d.title ?? '',
@@ -35,6 +36,8 @@ export default async function BulkEditPage() {
         programType: d.programType ?? '',
         subProgram: d.subProgram ?? null,
         programRequirements: d.programRequirements ?? [],
+        imageId: img?.id ?? null,
+        imageUrl: img?.sizes?.card?.url ?? img?.url ?? null,
       })
     } else {
       groupMap.get(tn)!.count++
