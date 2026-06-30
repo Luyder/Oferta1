@@ -22,11 +22,20 @@ const REQUIREMENT_LABELS: Record<string, string> = {
 const MODALITY_LABELS: Record<string, string> = {
   PRESENCIAL: 'Presencial',
   VIRTUAL: 'Virtual',
-  HÍBRIDA: 'Híbrida',
+  HÍBRIDA: 'Hyflex - Híbrida',
+}
+
+function normalize(s: string) {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
 }
 
 export default function CoursesGrid({ courses, showFilters = true, track }: Props) {
   const [selected, setSelected] = useState<CourseData | null>(null)
+  const [query, setQuery] = useState<string>('')
   const [modality, setModality] = useState<string>('all')
   const [activeTopics, setActiveTopics] = useState<string[]>([])
   const [requirement, setRequirement] = useState<string>('all')
@@ -60,7 +69,9 @@ export default function CoursesGrid({ courses, showFilters = true, track }: Prop
       prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
     )
 
+  const q = normalize(query)
   const filtered = courses.filter((c) => {
+    if (q && !normalize(c.title ?? '').includes(q)) return false
     if (modality !== 'all' && c.modality !== modality) return false
     if (activeTopics.length > 0) {
       const ct = c.topics ?? []
@@ -81,6 +92,22 @@ export default function CoursesGrid({ courses, showFilters = true, track }: Prop
 
   return (
     <>
+      <div className="relative mb-6">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-mono text-sm text-neutral-400"
+        >
+          ⌕
+        </span>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar curso por nombre…"
+          className="w-full rounded-full border border-neutral-300 bg-white py-3 pl-10 pr-4 font-display text-base text-black placeholder:text-neutral-400 focus:border-black focus:outline-none"
+        />
+      </div>
+
       {hasFilters && (
         <div className="mb-8 space-y-3">
           {modalities.length > 0 && (
