@@ -30,14 +30,14 @@ export default async function PosgradoPage() {
   const inMaestria = (c: typeof all[number], trackKey: string, subVals: string[]) => {
     const sp = (c as any).subProgram
     if (sp) return subVals.includes(sp)
-    const prs = c.programRequirements ?? []
-    if (prs.length > 0) return belongsToTrackByRequirements(c.programRequirements, trackKey)
+    const hasReqs = (c.obligatoriaEn?.length ?? 0) + (c.electivaEn?.length ?? 0) > 0
+    if (hasReqs) return belongsToTrackByRequirements(c.obligatoriaEn, c.electivaEn, trackKey)
     return true
   }
   const msProf = allMS.filter(c => inMaestria(c, 'profundizacion', ['profundizacion', 'compartido']))
   const msInv  = allMS.filter(c => inMaestria(c, 'investigacion', ['investigacion', 'compartido']))
-  const esp    = all.filter(c => c.programType === 'ESP' || belongsToTrackByRequirements(c.programRequirements, 'esp'))
-  const doc    = all.filter(c => c.programType === 'DOC' || belongsToTrackByRequirements(c.programRequirements, 'doc'))
+  const esp    = all.filter(c => c.programType === 'ESP' || belongsToTrackByRequirements(c.obligatoriaEn, c.electivaEn, 'esp'))
+  const doc    = all.filter(c => c.programType === 'DOC' || belongsToTrackByRequirements(c.obligatoriaEn, c.electivaEn, 'doc'))
 
   type Section = { key: string; label: string; sublabel?: string; courses: typeof all; accent: string; dark: boolean }
   const sections: Section[] = ([

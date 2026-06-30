@@ -204,18 +204,16 @@ export default function CourseDrawer({ course, onClose }: Props) {
           ) : null}
 
           {/* Program requirements (obligatoria / electiva) */}
-          {course.programRequirements && course.programRequirements.length > 0 && (
+          {((course.obligatoriaEn?.length ?? 0) > 0 || (course.electivaEn?.length ?? 0) > 0) && (
             <div className="mt-6 flex flex-wrap gap-2">
-              {course.programRequirements.map((pr, i) => (
-                <span
-                  key={i}
-                  className={`rounded-full px-3 py-1 font-mono text-xs ${
-                    pr.requirement === 'obligatoria'
-                      ? 'bg-black text-white'
-                      : 'bg-neutral-100 text-neutral-700 ring-1 ring-neutral-300'
-                  }`}
-                >
-                  {pr.requirement === 'obligatoria' ? 'Obligatoria' : 'Electiva'} · {pr.program}
+              {(course.obligatoriaEn ?? []).map((p, i) => (
+                <span key={`o${i}`} className="rounded-full bg-black px-3 py-1 font-mono text-xs text-white">
+                  Obligatoria · {p}
+                </span>
+              ))}
+              {(course.electivaEn ?? []).map((p, i) => (
+                <span key={`e${i}`} className="rounded-full bg-neutral-100 px-3 py-1 font-mono text-xs text-neutral-700 ring-1 ring-neutral-300">
+                  Electiva · {p}
                 </span>
               ))}
             </div>

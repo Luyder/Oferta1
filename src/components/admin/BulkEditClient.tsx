@@ -3,15 +3,14 @@
 import { useRef, useState } from 'react'
 import { PROGRAM_GROUPS } from '@/lib/programs'
 
-type ProgramRequirement = { program: string; requirement: 'obligatoria' | 'electiva' }
-
 export type CourseGroup = {
   titleNormalized: string
   title: string
   count: number
   programType: string
   subProgram: string | null
-  programRequirements: ProgramRequirement[]
+  obligatoriaEn: string[]
+  electivaEn: string[]
   imageId?: number | string | null
   imageUrl?: string | null
 }
@@ -31,7 +30,7 @@ export default function BulkEditClient({ groups }: { groups: CourseGroup[] }) {
         Edición masiva de cursos
       </h1>
       <p style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: 'var(--theme-elevation-500)', margin: '0 0 2rem' }}>
-        Cursos con 2 o más secciones (NRC). Edita el track, los requisitos y la foto de todas las secciones a la vez.
+        Cursos con 2 o más secciones (NRC). Edita el track, la foto y los requisitos de todas las secciones a la vez.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {groups.map((group) => (
@@ -42,52 +41,77 @@ export default function BulkEditClient({ groups }: { groups: CourseGroup[] }) {
   )
 }
 
-const selectStyle: React.CSSProperties = {
-  padding: '6px 10px',
-  borderRadius: '4px',
-  border: '1px solid var(--theme-elevation-300)',
-  background: 'var(--theme-elevation-0)',
-  fontFamily: 'sans-serif',
-  fontSize: '0.88rem',
-}
+const ALL_PROGRAMS = PROGRAM_GROUPS.flatMap((g) => g.programs)
 
-function ProgramSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function ProgramCheckboxList({
+  label,
+  color,
+  selected,
+  onChange,
+}: {
+  label: string
+  color: string
+  selected: string[]
+  onChange: (v: string[]) => void
+}) {
+  const toggle = (p: string) =>
+    onChange(selected.includes(p) ? selected.filter((x) => x !== p) : [...selected, p])
+
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...selectStyle, flex: 1 }}>
-      <option value="">— seleccionar programa —</option>
-      {PROGRAM_GROUPS.map((group) => (
-        <optgroup key={group.label} label={group.label}>
-          {group.programs.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </optgroup>
-      ))}
-    </select>
+    <div style={{ flex: 1 }}>
+      <div style={{
+        display: 'inline-block',
+        marginBottom: '8px',
+        padding: '3px 10px',
+        borderRadius: '99px',
+        background: color,
+        color: 'white',
+        fontFamily: 'sans-serif',
+        fontSize: '0.78rem',
+        fontWeight: 700,
+        letterSpacing: '0.04em',
+      }}>
+        {label}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {PROGRAM_GROUPS.map((group) => (
+          <div key={group.label}>
+            <div style={{ fontFamily: 'sans-serif', fontSize: '0.72rem', fontWeight: 700, color: 'var(--theme-elevation-400)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '8px', marginBottom: '3px' }}>
+              {group.label}
+            </div>
+            {group.programs.map((p) => (
+              <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', padding: '3px 4px', borderRadius: '4px', background: selected.includes(p) ? (color === '#dc2626' ? '#fff1f2' : '#f0f9ff') : 'transparent' }}>
+                <input
+                  type="checkbox"
+                  checked={selected.includes(p)}
+                  onChange={() => toggle(p)}
+                  style={{ accentColor: color, width: 14, height: 14, flexShrink: 0 }}
+                />
+                <span style={{ fontFamily: 'sans-serif', fontSize: '0.82rem', color: 'var(--theme-elevation-700)' }}>{p}</span>
+              </label>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
 function GroupCard({ group }: { group: CourseGroup }) {
   const [subProgram, setSubProgram] = useState(group.subProgram ?? '')
-  const [reqs, setReqs] = useState<ProgramRequirement[]>(group.programRequirements)
+  const [obligatoriaEn, setObligatoriaEn] = useState<string[]>(group.obligatoriaEn)
+  const [electivaEn, setElectivaEn] = useState<string[]>(group.electivaEn)
   const [pendingImageId, setPendingImageId] = useState<number | string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(group.imageUrl ?? null)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const addReq = () => setReqs([...reqs, { program: '', requirement: 'obligatoria' }])
-  const removeReq = (i: number) => setReqs(reqs.filter((_, idx) => idx !== i))
-  const updateReq = (i: number, field: keyof ProgramRequirement, value: string) =>
-    setReqs(reqs.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)))
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    // Instant local preview
     setPreviewUrl(URL.createObjectURL(file))
     setUploadStatus('uploading')
-
     try {
       const form = new FormData()
       form.append('file', file)
@@ -109,7 +133,8 @@ function GroupCard({ group }: { group: CourseGroup }) {
     try {
       const body: Record<string, unknown> = {
         titleNormalized: group.titleNormalized,
-        programRequirements: reqs.filter((r) => r.program.trim()),
+        obligatoriaEn,
+        electivaEn,
       }
       if (group.programType === 'MS') body.subProgram = subProgram || null
       if (pendingImageId !== null) body.imageId = pendingImageId
@@ -127,20 +152,7 @@ function GroupCard({ group }: { group: CourseGroup }) {
     }
   }
 
-  const saveBg =
-    saveStatus === 'saved' ? '#16a34a' : saveStatus === 'error' ? '#dc2626' : '#4f46e5'
-
-  const uploadBtnBg =
-    uploadStatus === 'uploading'
-      ? 'var(--theme-elevation-200)'
-      : uploadStatus === 'done'
-      ? '#dcfce7'
-      : uploadStatus === 'error'
-      ? '#fee2e2'
-      : 'var(--theme-elevation-100)'
-
-  const uploadBtnColor =
-    uploadStatus === 'done' ? '#15803d' : uploadStatus === 'error' ? '#dc2626' : 'var(--theme-elevation-700)'
+  const saveBg = saveStatus === 'saved' ? '#16a34a' : saveStatus === 'error' ? '#dc2626' : '#4f46e5'
 
   return (
     <div style={{ border: '1px solid var(--theme-elevation-200)', borderRadius: '8px', padding: '1.25rem 1.5rem', background: 'var(--theme-elevation-50)' }}>
@@ -150,7 +162,7 @@ function GroupCard({ group }: { group: CourseGroup }) {
         <div>
           <div style={{ fontFamily: 'sans-serif', fontWeight: 700, fontSize: '0.95rem' }}>{group.title}</div>
           <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--theme-elevation-500)', marginTop: '2px' }}>
-            {group.count} secciones (NRC) · {group.programType}
+            {group.count} secciones · {group.programType}
           </div>
         </div>
         <button
@@ -163,19 +175,15 @@ function GroupCard({ group }: { group: CourseGroup }) {
       </div>
 
       {/* Foto */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>
-          Foto del curso
-        </label>
+      <div style={{ marginBottom: '1.1rem' }}>
+        <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>Foto del curso</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: 110, height: 74, borderRadius: '6px', overflow: 'hidden', background: 'var(--theme-elevation-150)', flexShrink: 0, border: '1px solid var(--theme-elevation-200)' }}>
             {previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={previewUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', color: 'var(--theme-elevation-400)', fontFamily: 'monospace' }}>
-                Sin imagen
-              </div>
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', color: 'var(--theme-elevation-400)', fontFamily: 'monospace' }}>Sin imagen</div>
             )}
           </div>
           <div>
@@ -183,31 +191,20 @@ function GroupCard({ group }: { group: CourseGroup }) {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadStatus === 'uploading'}
-              style={{ padding: '6px 14px', background: uploadBtnBg, color: uploadBtnColor, border: '1px solid var(--theme-elevation-200)', borderRadius: '5px', cursor: uploadStatus === 'uploading' ? 'wait' : 'pointer', fontFamily: 'sans-serif', fontSize: '0.84rem', fontWeight: 500 }}
+              style={{ padding: '6px 14px', background: 'var(--theme-elevation-100)', color: uploadStatus === 'done' ? '#15803d' : uploadStatus === 'error' ? '#dc2626' : 'var(--theme-elevation-700)', border: '1px solid var(--theme-elevation-200)', borderRadius: '5px', cursor: uploadStatus === 'uploading' ? 'wait' : 'pointer', fontFamily: 'sans-serif', fontSize: '0.84rem', fontWeight: 500 }}
             >
-              {uploadStatus === 'uploading' ? 'Subiendo…' : uploadStatus === 'done' ? '✓ Foto lista' : uploadStatus === 'error' ? 'Error al subir' : previewUrl ? 'Cambiar foto' : 'Subir foto'}
+              {uploadStatus === 'uploading' ? 'Subiendo…' : uploadStatus === 'done' ? '✓ Lista' : uploadStatus === 'error' ? 'Error al subir' : previewUrl ? 'Cambiar foto' : 'Subir foto'}
             </button>
-            {uploadStatus === 'idle' && previewUrl && (
-              <p style={{ margin: '4px 0 0', fontFamily: 'sans-serif', fontSize: '0.75rem', color: 'var(--theme-elevation-400)' }}>
-                Se aplicará al guardar
-              </p>
-            )}
-            {uploadStatus === 'done' && (
-              <p style={{ margin: '4px 0 0', fontFamily: 'sans-serif', fontSize: '0.75rem', color: '#15803d' }}>
-                Foto subida · guarda para asignarla
-              </p>
-            )}
+            {uploadStatus === 'done' && <p style={{ margin: '4px 0 0', fontFamily: 'sans-serif', fontSize: '0.75rem', color: '#15803d' }}>Guarda para asignarla a todas</p>}
           </div>
         </div>
       </div>
 
       {/* Track de maestría — solo MS */}
       {group.programType === 'MS' && (
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '5px' }}>
-            Track de maestría
-          </label>
-          <select value={subProgram} onChange={(e) => setSubProgram(e.target.value)} style={selectStyle}>
+        <div style={{ marginBottom: '1.1rem' }}>
+          <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '5px' }}>Track de maestría</label>
+          <select value={subProgram} onChange={(e) => setSubProgram(e.target.value)} style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--theme-elevation-300)', background: 'var(--theme-elevation-0)', fontFamily: 'sans-serif', fontSize: '0.88rem' }}>
             <option value="">(sin asignar)</option>
             <option value="profundizacion">Profundización</option>
             <option value="investigacion">Investigación</option>
@@ -216,24 +213,26 @@ function GroupCard({ group }: { group: CourseGroup }) {
         </div>
       )}
 
-      {/* programRequirements */}
+      {/* Obligatoria / Electiva — dos listas de checkboxes */}
       <div>
-        <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>
-          Obligatoria / Electiva por programa
+        <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '10px' }}>
+          Tipo por programa
         </label>
-        {reqs.map((req, i) => (
-          <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px', alignItems: 'center' }}>
-            <ProgramSelect value={req.program} onChange={(v) => updateReq(i, 'program', v)} />
-            <select value={req.requirement} onChange={(e) => updateReq(i, 'requirement', e.target.value as 'obligatoria' | 'electiva')} style={selectStyle}>
-              <option value="obligatoria">Obligatoria</option>
-              <option value="electiva">Electiva</option>
-            </select>
-            <button onClick={() => removeReq(i)} title="Eliminar" style={{ padding: '6px 10px', background: 'transparent', border: '1px solid var(--theme-elevation-300)', borderRadius: '4px', cursor: 'pointer', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '0.9rem' }}>✕</button>
-          </div>
-        ))}
-        <button onClick={addReq} style={{ padding: '5px 14px', background: 'transparent', border: '1px dashed var(--theme-elevation-400)', borderRadius: '4px', cursor: 'pointer', fontFamily: 'sans-serif', fontSize: '0.82rem', color: 'var(--theme-elevation-600)', marginTop: '4px' }}>
-          + Agregar programa
-        </button>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+          <ProgramCheckboxList
+            label="OBLIGATORIA EN"
+            color="#1e293b"
+            selected={obligatoriaEn}
+            onChange={setObligatoriaEn}
+          />
+          <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--theme-elevation-200)', flexShrink: 0 }} />
+          <ProgramCheckboxList
+            label="ELECTIVA EN"
+            color="#6b7280"
+            selected={electivaEn}
+            onChange={setElectivaEn}
+          />
+        </div>
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import config from '@payload-config'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { titleNormalized, subProgram, programRequirements, imageId } = body
+    const { titleNormalized, subProgram, obligatoriaEn, electivaEn, imageId } = body
 
     if (!titleNormalized) {
       return NextResponse.json({ error: 'titleNormalized required' }, { status: 400 })
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
 
     const updateData: Record<string, unknown> = {}
     if (subProgram !== undefined) updateData.subProgram = subProgram || null
-    if (programRequirements !== undefined) updateData.programRequirements = programRequirements
+    if (obligatoriaEn !== undefined) updateData.obligatoriaEn = obligatoriaEn
+    if (electivaEn !== undefined) updateData.electivaEn = electivaEn
     if (imageId !== undefined) updateData.image = imageId || null
 
     await Promise.all(

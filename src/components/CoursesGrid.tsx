@@ -48,7 +48,7 @@ export default function CoursesGrid({ courses, showFilters = true, track }: Prop
   const requirements = useMemo(() => {
     const set = new Set<string>()
     for (const c of courses) {
-      for (const r of requirementsForTrack(c.programRequirements, track)) {
+      for (const r of requirementsForTrack(c.obligatoriaEn, c.electivaEn, track)) {
         set.add(r)
       }
     }
@@ -67,7 +67,7 @@ export default function CoursesGrid({ courses, showFilters = true, track }: Prop
       if (!activeTopics.some((t) => ct.includes(t))) return false
     }
     if (requirement !== 'all') {
-      const reqs = requirementsForTrack(c.programRequirements, track)
+      const reqs = requirementsForTrack(c.obligatoriaEn, c.electivaEn, track)
       if (!reqs.includes(requirement as 'obligatoria' | 'electiva')) return false
     }
     return true

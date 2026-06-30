@@ -25,7 +25,8 @@ export type CourseData = {
   prerequisites?: string | null
   corequisites?: string | null
   observations?: string | null
-  programRequirements?: Array<{ program: string; requirement: 'obligatoria' | 'electiva' }> | null
+  obligatoriaEn?: string[] | null
+  electivaEn?: string[] | null
   active: boolean
   subProgram?: string | null
   /** Nombres de las categorías temáticas asignadas (para filtrar) */
@@ -53,7 +54,7 @@ export default function CourseCard({ course, onClick, track }: Props) {
   // Obligatoria / electiva según el programa de la pestaña activa (solo posgrado).
   const isPosgrado = ['MS', 'ESP', 'DOC'].includes(course.programType)
   const requirements = isPosgrado
-    ? requirementsForTrack(course.programRequirements, track)
+    ? requirementsForTrack(course.obligatoriaEn, course.electivaEn, track)
     : []
 
   return (

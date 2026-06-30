@@ -189,33 +189,24 @@ export const Courses: CollectionConfig = {
       admin: { description: 'Notas adicionales (ej: "Solo para estudiantes de cuarto semestre en adelante").' },
     },
     {
-      name: 'programRequirements',
-      type: 'array',
-      label: 'Obligatoria / Electiva por programa',
-      labels: { singular: 'Programa', plural: 'Programas' },
+      name: 'obligatoriaEn',
+      type: 'select',
+      hasMany: true,
+      label: 'Obligatoria en...',
+      options: PROGRAM_OPTIONS,
       admin: {
-        description: 'Indica en qué programas el curso es obligatorio o electivo.',
+        description: 'Programas en los que este curso es obligatorio. Selección múltiple.',
       },
-      fields: [
-        {
-          name: 'program',
-          type: 'select',
-          label: 'Programa',
-          required: true,
-          options: PROGRAM_OPTIONS,
-          admin: { description: 'Selecciona el programa al que aplica esta obligatoriedad.' },
-        },
-        {
-          name: 'requirement',
-          type: 'select',
-          label: 'Tipo',
-          required: true,
-          options: [
-            { label: 'Obligatoria', value: 'obligatoria' },
-            { label: 'Electiva', value: 'electiva' },
-          ],
-        },
-      ],
+    },
+    {
+      name: 'electivaEn',
+      type: 'select',
+      hasMany: true,
+      label: 'Electiva en...',
+      options: PROGRAM_OPTIONS,
+      admin: {
+        description: 'Programas en los que este curso es electivo. Selección múltiple.',
+      },
     },
     {
       name: 'image',

@@ -1,7 +1,5 @@
 export type Requirement = 'obligatoria' | 'electiva'
 
-export type ProgramRequirement = { program: string; requirement: Requirement }
-
 const KNOWN_TRACKS = ['profundizacion', 'investigacion', 'esp', 'doc']
 
 function normalize(s: string): string {
@@ -11,17 +9,6 @@ function normalize(s: string): string {
     .toLowerCase()
 }
 
-/**
- * ¿El texto del programa (normalizado) corresponde a la pestaña indicada?
- *
- * Reglas:
- * - "Todos los posgrados" → aplica a cualquier pestaña.
- * - Maestría Profundización / Investigación: coincide si el texto nombra ese
- *   track explícitamente, O si menciona "maestría" de forma genérica (sin
- *   nombrar el otro track). Así una "Maestría para Concentración en ..." (sin
- *   decir Prof ni Inv) cuenta como electiva/obligatoria en ambas maestrías.
- * - Especialización / Doctorado: coincide si el texto los nombra.
- */
 function matchesTrack(programNorm: string, track: string): boolean {
   if (programNorm.includes('todos')) return true
 
@@ -42,34 +29,37 @@ function matchesTrack(programNorm: string, track: string): boolean {
 }
 
 /**
- * Devuelve el/los requisito(s) (obligatoria/electiva) que aplican al programa
- * de la pestaña indicada. Si no se da una pestaña conocida, devuelve el conjunto
- * de requisitos distintos (todos).
+ * Returns which requirement types apply to the given tab.
+ * Uses two separate lists: programs where the course is obligatoria / electiva.
  */
 export function requirementsForTrack(
-  programRequirements: ProgramRequirement[] | null | undefined,
+  obligatoriaEn: string[] | null | undefined,
+  electivaEn: string[] | null | undefined,
   track?: string,
 ): Requirement[] {
-  const prs = programRequirements ?? []
-  if (prs.length === 0) return []
+  const oblig = obligatoriaEn ?? []
+  const elect = electivaEn ?? []
 
   if (!track || !KNOWN_TRACKS.includes(track)) {
-    return Array.from(new Set(prs.map((p) => p.requirement)))
+    const result: Requirement[] = []
+    if (oblig.length > 0) result.push('obligatoria')
+    if (elect.length > 0) result.push('electiva')
+    return result
   }
 
-  const matched = prs.filter((p) => matchesTrack(normalize(p.program), track))
-  return Array.from(new Set(matched.map((p) => p.requirement)))
+  const result: Requirement[] = []
+  if (oblig.some((p) => matchesTrack(normalize(p), track))) result.push('obligatoria')
+  if (elect.some((p) => matchesTrack(normalize(p), track))) result.push('electiva')
+  return result
 }
 
 /**
- * ¿Este curso corresponde a la pestaña indicada según su `programRequirements`?
- * (Se usa además del campo manual `subProgram` para incluir un curso en todos
- * los programas donde aparece, ej: obligatoria en Investigación + electiva en
- * Profundización → aparece en ambas pestañas.)
+ * Returns true if the course belongs to the given tab based on its program lists.
  */
 export function belongsToTrackByRequirements(
-  programRequirements: ProgramRequirement[] | null | undefined,
+  obligatoriaEn: string[] | null | undefined,
+  electivaEn: string[] | null | undefined,
   track: string,
 ): boolean {
-  return requirementsForTrack(programRequirements, track).length > 0
+  return requirementsForTrack(obligatoriaEn, electivaEn, track).length > 0
 }

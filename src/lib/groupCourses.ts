@@ -16,7 +16,8 @@ type RawDoc = {
   prerequisites?: string | null
   corequisites?: string | null
   observations?: string | null
-  programRequirements?: Array<{ program: string; requirement: string }> | null
+  obligatoriaEn?: string[] | null
+  electivaEn?: string[] | null
   active?: boolean | null
   subProgram?: string | null
   topics?: unknown
@@ -94,7 +95,8 @@ export function groupCourses(docs: RawDoc[]): CourseData[] {
         prerequisites: d.prerequisites ?? null,
         corequisites: d.corequisites ?? null,
         observations: d.observations ?? null,
-        programRequirements: (d.programRequirements as CourseData['programRequirements']) ?? null,
+        obligatoriaEn: (d.obligatoriaEn as string[]) ?? [],
+        electivaEn: (d.electivaEn as string[]) ?? [],
         active: d.active ?? true,
         subProgram: d.subProgram ?? null,
         topics: extractTopics(d),

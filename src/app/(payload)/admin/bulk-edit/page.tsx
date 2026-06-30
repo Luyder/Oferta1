@@ -35,7 +35,8 @@ export default async function BulkEditPage() {
         count: 1,
         programType: d.programType ?? '',
         subProgram: d.subProgram ?? null,
-        programRequirements: d.programRequirements ?? [],
+        obligatoriaEn: (d.obligatoriaEn as string[]) ?? [],
+        electivaEn: (d.electivaEn as string[]) ?? [],
         imageId: img?.id ?? null,
         imageUrl: img?.sizes?.card?.url ?? img?.url ?? null,
       })

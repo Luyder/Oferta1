@@ -182,17 +182,58 @@ export interface Course {
    */
   observations?: string | null;
   /**
-   * Indica en qué programas el curso es obligatorio o electivo.
+   * Programas en los que este curso es obligatorio. Selección múltiple.
    */
-  programRequirements?:
-    | {
-        /**
-         * Ej: Maestría en Educación Investigación, Doctorado, Todos los posgrados…
-         */
-        program: string;
-        requirement: 'obligatoria' | 'electiva';
-        id?: string | null;
-      }[]
+  obligatoriaEn?:
+    | (
+        | 'Todos los programas'
+        | 'Todos los posgrados'
+        | 'Licenciatura en Artes'
+        | 'Licenciatura en Biología'
+        | 'Licenciatura en Educación Infantil'
+        | 'Licenciatura en Español y Filología'
+        | 'Licenciatura en Filosofía'
+        | 'Licenciatura en Física'
+        | 'Licenciatura en Historia'
+        | 'Licenciatura en Matemáticas'
+        | 'Licenciatura en Química'
+        | 'Opción en Pedagogía'
+        | 'Especialización en Innovación Curricular y Pedagógica'
+        | 'Especialización en Liderazgo y Política Educativa'
+        | 'Especialización en Educación Matemática para Profesores de Primaria'
+        | 'Maestría en Educación – Profundización (virtual)'
+        | 'Maestría en Educación – Profundización (semipresencial)'
+        | 'Maestría en Educación – Investigación (semipresencial)'
+        | 'Maestría en Educación Matemática'
+        | 'Doctorado en Educación'
+      )[]
+    | null;
+  /**
+   * Programas en los que este curso es electivo. Selección múltiple.
+   */
+  electivaEn?:
+    | (
+        | 'Todos los programas'
+        | 'Todos los posgrados'
+        | 'Licenciatura en Artes'
+        | 'Licenciatura en Biología'
+        | 'Licenciatura en Educación Infantil'
+        | 'Licenciatura en Español y Filología'
+        | 'Licenciatura en Filosofía'
+        | 'Licenciatura en Física'
+        | 'Licenciatura en Historia'
+        | 'Licenciatura en Matemáticas'
+        | 'Licenciatura en Química'
+        | 'Opción en Pedagogía'
+        | 'Especialización en Innovación Curricular y Pedagógica'
+        | 'Especialización en Liderazgo y Política Educativa'
+        | 'Especialización en Educación Matemática para Profesores de Primaria'
+        | 'Maestría en Educación – Profundización (virtual)'
+        | 'Maestría en Educación – Profundización (semipresencial)'
+        | 'Maestría en Educación – Investigación (semipresencial)'
+        | 'Maestría en Educación Matemática'
+        | 'Doctorado en Educación'
+      )[]
     | null;
   image?: (number | null) | Media;
   professor?: (number | null) | Professor;
@@ -409,13 +450,8 @@ export interface CoursesSelect<T extends boolean = true> {
   prerequisites?: T;
   corequisites?: T;
   observations?: T;
-  programRequirements?:
-    | T
-    | {
-        program?: T;
-        requirement?: T;
-        id?: T;
-      };
+  obligatoriaEn?: T;
+  electivaEn?: T;
   image?: T;
   professor?: T;
   active?: T;
