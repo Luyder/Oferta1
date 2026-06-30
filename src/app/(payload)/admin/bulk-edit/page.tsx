@@ -30,6 +30,7 @@ export default async function BulkEditPage() {
         titleNormalized: tn,
         title: d.title ?? '',
         count: 1,
+        programType: d.programType ?? '',
         subProgram: d.subProgram ?? null,
         programRequirements: d.programRequirements ?? [],
       })

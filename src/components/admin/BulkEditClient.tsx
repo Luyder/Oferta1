@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { PROGRAM_GROUPS } from '@/lib/programs'
 
 type ProgramRequirement = { program: string; requirement: 'obligatoria' | 'electiva' }
 
@@ -8,6 +9,7 @@ export type CourseGroup = {
   titleNormalized: string
   title: string
   count: number
+  programType: string
   subProgram: string | null
   programRequirements: ProgramRequirement[]
 }
@@ -27,7 +29,7 @@ export default function BulkEditClient({ groups }: { groups: CourseGroup[] }) {
         Edición masiva de cursos
       </h1>
       <p style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: 'var(--theme-elevation-500)', margin: '0 0 2rem' }}>
-        Cursos con 2 o más secciones (NRC). Edita el track de maestría y los requisitos de todas las secciones a la vez.
+        Cursos con 2 o más secciones (NRC). Edita el track y los requisitos de todas las secciones a la vez.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {groups.map((group) => (
@@ -35,6 +37,38 @@ export default function BulkEditClient({ groups }: { groups: CourseGroup[] }) {
         ))}
       </div>
     </div>
+  )
+}
+
+const selectStyle: React.CSSProperties = {
+  padding: '6px 10px',
+  borderRadius: '4px',
+  border: '1px solid var(--theme-elevation-300)',
+  background: 'var(--theme-elevation-0)',
+  fontFamily: 'sans-serif',
+  fontSize: '0.88rem',
+}
+
+function ProgramSelect({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...selectStyle, flex: 1 }}>
+      <option value="">— seleccionar programa —</option>
+      {PROGRAM_GROUPS.map((group) => (
+        <optgroup key={group.label} label={group.label}>
+          {group.programs.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
   )
 }
 
@@ -51,14 +85,15 @@ function GroupCard({ group }: { group: CourseGroup }) {
   const save = async () => {
     setStatus('saving')
     try {
+      const body: Record<string, unknown> = {
+        titleNormalized: group.titleNormalized,
+        programRequirements: reqs.filter((r) => r.program.trim()),
+      }
+      if (group.programType === 'MS') body.subProgram = subProgram || null
       const res = await fetch('/api/bulk-update-group', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titleNormalized: group.titleNormalized,
-          subProgram: subProgram || null,
-          programRequirements: reqs.filter((r) => r.program.trim()),
-        }),
+        body: JSON.stringify(body),
       })
       if (!res.ok) throw new Error()
       setStatus('saved')
@@ -81,12 +116,12 @@ function GroupCard({ group }: { group: CourseGroup }) {
         background: 'var(--theme-elevation-50)',
       }}
     >
-      {/* Header row */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.1rem' }}>
         <div>
           <div style={{ fontFamily: 'sans-serif', fontWeight: 700, fontSize: '0.95rem' }}>{group.title}</div>
           <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--theme-elevation-500)', marginTop: '2px' }}>
-            {group.count} secciones (NRC)
+            {group.count} secciones (NRC) · {group.programType}
           </div>
         </div>
         <button
@@ -109,29 +144,24 @@ function GroupCard({ group }: { group: CourseGroup }) {
         </button>
       </div>
 
-      {/* subProgram */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '5px' }}>
-          Track de maestría
-        </label>
-        <select
-          value={subProgram}
-          onChange={(e) => setSubProgram(e.target.value)}
-          style={{
-            padding: '6px 10px',
-            borderRadius: '4px',
-            border: '1px solid var(--theme-elevation-300)',
-            background: 'var(--theme-elevation-0)',
-            fontFamily: 'sans-serif',
-            fontSize: '0.88rem',
-          }}
-        >
-          <option value="">(sin asignar)</option>
-          <option value="profundizacion">Profundización</option>
-          <option value="investigacion">Investigación</option>
-          <option value="compartido">Compartido (ambos tracks)</option>
-        </select>
-      </div>
+      {/* Track de maestría — solo para MS */}
+      {group.programType === 'MS' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '5px' }}>
+            Track de maestría
+          </label>
+          <select
+            value={subProgram}
+            onChange={(e) => setSubProgram(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="">(sin asignar)</option>
+            <option value="profundizacion">Profundización</option>
+            <option value="investigacion">Investigación</option>
+            <option value="compartido">Compartido (ambos tracks)</option>
+          </select>
+        </div>
+      )}
 
       {/* programRequirements */}
       <div>
@@ -140,32 +170,11 @@ function GroupCard({ group }: { group: CourseGroup }) {
         </label>
         {reqs.map((req, i) => (
           <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px', alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Ej: Maestría en Educación Investigación"
-              value={req.program}
-              onChange={(e) => updateReq(i, 'program', e.target.value)}
-              style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: '4px',
-                border: '1px solid var(--theme-elevation-300)',
-                background: 'var(--theme-elevation-0)',
-                fontFamily: 'sans-serif',
-                fontSize: '0.88rem',
-              }}
-            />
+            <ProgramSelect value={req.program} onChange={(v) => updateReq(i, 'program', v)} />
             <select
               value={req.requirement}
               onChange={(e) => updateReq(i, 'requirement', e.target.value as 'obligatoria' | 'electiva')}
-              style={{
-                padding: '6px 10px',
-                borderRadius: '4px',
-                border: '1px solid var(--theme-elevation-300)',
-                background: 'var(--theme-elevation-0)',
-                fontFamily: 'sans-serif',
-                fontSize: '0.88rem',
-              }}
+              style={selectStyle}
             >
               <option value="obligatoria">Obligatoria</option>
               <option value="electiva">Electiva</option>

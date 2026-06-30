@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { PROGRAM_OPTIONS } from '@/lib/programs'
 
 function normalize(str: string) {
   return str
@@ -198,10 +199,11 @@ export const Courses: CollectionConfig = {
       fields: [
         {
           name: 'program',
-          type: 'text',
+          type: 'select',
           label: 'Programa',
           required: true,
-          admin: { description: 'Ej: Maestría en Educación Investigación, Doctorado, Todos los posgrados…' },
+          options: PROGRAM_OPTIONS,
+          admin: { description: 'Selecciona el programa al que aplica esta obligatoriedad.' },
         },
         {
           name: 'requirement',
