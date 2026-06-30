@@ -12,7 +12,7 @@ export default async function PosgradoPage() {
 
   const { docs } = await payload.find({
     collection: 'courses',
-    where: { category: { equals: 'posgrado' } },
+    where: { category: { equals: 'posgrado' }, active: { not_equals: false } },
     sort: 'order',
     limit: 200,
     depth: 2,

@@ -11,7 +11,7 @@ export default async function PregradoPage() {
 
   const { docs } = await payload.find({
     collection: 'courses',
-    where: { category: { equals: 'pregrado' } },
+    where: { category: { equals: 'pregrado' }, active: { not_equals: false } },
     sort: 'order',
     limit: 200,
     depth: 2,

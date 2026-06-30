@@ -28,7 +28,6 @@ export const PROGRAM_GROUPS: ProgramGroup[] = [
     programs: [
       'Especialización en Innovación Curricular y Pedagógica',
       'Especialización en Liderazgo y Política Educativa',
-      'Especialización en Educación Matemática para Profesores de Primaria',
     ],
   },
   {

@@ -25,6 +25,10 @@ export const ViewSiteLink: React.FC = () => {
         <span aria-hidden="true">⚡</span>
         Edición masiva
       </a>
+      <a href="/admin/reorder" style={linkStyle}>
+        <span aria-hidden="true">⠿</span>
+        Ordenar cursos
+      </a>
     </div>
   )
 }

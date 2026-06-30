@@ -11,7 +11,7 @@ export default async function ProfesPage() {
 
   const [{ docs: profDocs }, { docs: courseDocs }] = await Promise.all([
     payload.find({ collection: 'professors', sort: 'name', limit: 200, depth: 1 }),
-    payload.find({ collection: 'courses', limit: 300, depth: 0 }),
+    payload.find({ collection: 'courses', where: { active: { not_equals: false } }, limit: 300, depth: 0 }),
   ])
 
   // Build a map: professorId → list of courses (deduplicated by title)

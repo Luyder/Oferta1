@@ -187,6 +187,7 @@ export interface Course {
   obligatoriaEn?:
     | (
         | 'Todos los programas'
+        | 'Todos los pregrados'
         | 'Todos los posgrados'
         | 'Licenciatura en Artes'
         | 'Licenciatura en Biología'
@@ -200,7 +201,6 @@ export interface Course {
         | 'Opción en Pedagogía'
         | 'Especialización en Innovación Curricular y Pedagógica'
         | 'Especialización en Liderazgo y Política Educativa'
-        | 'Especialización en Educación Matemática para Profesores de Primaria'
         | 'Maestría en Educación – Profundización (virtual)'
         | 'Maestría en Educación – Profundización (semipresencial)'
         | 'Maestría en Educación – Investigación (semipresencial)'
@@ -214,6 +214,7 @@ export interface Course {
   electivaEn?:
     | (
         | 'Todos los programas'
+        | 'Todos los pregrados'
         | 'Todos los posgrados'
         | 'Licenciatura en Artes'
         | 'Licenciatura en Biología'
@@ -227,7 +228,6 @@ export interface Course {
         | 'Opción en Pedagogía'
         | 'Especialización en Innovación Curricular y Pedagógica'
         | 'Especialización en Liderazgo y Política Educativa'
-        | 'Especialización en Educación Matemática para Profesores de Primaria'
         | 'Maestría en Educación – Profundización (virtual)'
         | 'Maestría en Educación – Profundización (semipresencial)'
         | 'Maestría en Educación – Investigación (semipresencial)'
