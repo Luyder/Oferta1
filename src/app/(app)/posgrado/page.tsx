@@ -21,15 +21,18 @@ export default async function PosgradoPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const all = groupCourses(docs as any[])
 
-  // Un curso MS pertenece a una pestaña si: su campo manual `subProgram` lo
-  // indica (o está sin etiquetar → aparece en ambas maestrías), O si su
-  // `programRequirements` menciona ese programa (ej: obligatoria en Investigación
-  // + electiva en Profundización → aparece en ambas con el indicador correcto).
+  // Un curso MS pertenece a una pestaña según esta prioridad:
+  // 1. Si tiene `subProgram` explícito → úsalo directamente.
+  // 2. Si no tiene `subProgram` pero tiene `programRequirements` → el matching
+  //    de texto determina en qué pestaña aparece (puede ser una o ambas).
+  // 3. Sin ninguno de los dos → aparece en ambas maestrías (curso genérico).
   const allMS = all.filter(c => c.programType === 'MS')
   const inMaestria = (c: typeof all[number], trackKey: string, subVals: string[]) => {
     const sp = (c as any).subProgram
-    const bySub = subVals.includes(sp) || !sp
-    return bySub || belongsToTrackByRequirements(c.programRequirements, trackKey)
+    if (sp) return subVals.includes(sp)
+    const prs = c.programRequirements ?? []
+    if (prs.length > 0) return belongsToTrackByRequirements(c.programRequirements, trackKey)
+    return true
   }
   const msProf = allMS.filter(c => inMaestria(c, 'profundizacion', ['profundizacion', 'compartido']))
   const msInv  = allMS.filter(c => inMaestria(c, 'investigacion', ['investigacion', 'compartido']))
