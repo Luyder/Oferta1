@@ -2,7 +2,6 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE TABLE \`courses_obligatoria_en\` (
-    \`id\` text PRIMARY KEY NOT NULL,
     \`order\` integer NOT NULL,
     \`parent_id\` integer NOT NULL,
     \`value\` text,
@@ -12,7 +11,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE INDEX \`courses_obligatoria_en_parent_id_idx\` ON \`courses_obligatoria_en\` (\`parent_id\`);`)
 
   await db.run(sql`CREATE TABLE \`courses_electiva_en\` (
-    \`id\` text PRIMARY KEY NOT NULL,
     \`order\` integer NOT NULL,
     \`parent_id\` integer NOT NULL,
     \`value\` text,

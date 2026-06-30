@@ -41,8 +41,6 @@ export default function BulkEditClient({ groups }: { groups: CourseGroup[] }) {
   )
 }
 
-const ALL_PROGRAMS = PROGRAM_GROUPS.flatMap((g) => g.programs)
-
 function ProgramCheckboxList({
   label,
   color,
@@ -54,11 +52,16 @@ function ProgramCheckboxList({
   selected: string[]
   onChange: (v: string[]) => void
 }) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+
   const toggle = (p: string) =>
     onChange(selected.includes(p) ? selected.filter((x) => x !== p) : [...selected, p])
 
+  const toggleGroup = (groupLabel: string) =>
+    setOpenGroups((prev) => ({ ...prev, [groupLabel]: !prev[groupLabel] }))
+
   return (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{
         display: 'inline-block',
         marginBottom: '8px',
@@ -72,26 +75,64 @@ function ProgramCheckboxList({
         letterSpacing: '0.04em',
       }}>
         {label}
+        {selected.length > 0 && (
+          <span style={{ marginLeft: 6, background: 'rgba(255,255,255,0.3)', borderRadius: '99px', padding: '1px 6px', fontSize: '0.72rem' }}>
+            {selected.length}
+          </span>
+        )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        {PROGRAM_GROUPS.map((group) => (
-          <div key={group.label}>
-            <div style={{ fontFamily: 'sans-serif', fontSize: '0.72rem', fontWeight: 700, color: 'var(--theme-elevation-400)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '8px', marginBottom: '3px' }}>
-              {group.label}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {PROGRAM_GROUPS.map((group) => {
+          const isOpen = !!openGroups[group.label]
+          const checkedCount = group.programs.filter((p) => selected.includes(p)).length
+
+          return (
+            <div key={group.label} style={{ border: '1px solid var(--theme-elevation-200)', borderRadius: '5px', overflow: 'hidden' }}>
+              {/* Group header — clickable toggle */}
+              <button
+                type="button"
+                onClick={() => toggleGroup(group.label)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 10px',
+                  background: checkedCount > 0 ? 'var(--theme-elevation-100)' : 'var(--theme-elevation-50)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ fontFamily: 'sans-serif', fontSize: '0.8rem', fontWeight: 600, color: 'var(--theme-elevation-700)' }}>
+                  {group.label}
+                  {checkedCount > 0 && (
+                    <span style={{ marginLeft: 6, color: color, fontWeight: 700 }}>✓{checkedCount}</span>
+                  )}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--theme-elevation-400)' }}>{isOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {/* Programs list — only shown when open */}
+              {isOpen && (
+                <div style={{ padding: '6px 10px 8px', display: 'flex', flexDirection: 'column', gap: '3px', background: 'var(--theme-elevation-0)' }}>
+                  {group.programs.map((p) => (
+                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', padding: '3px 4px', borderRadius: '4px', background: selected.includes(p) ? (color === '#1e293b' ? '#f1f5f9' : '#f9fafb') : 'transparent' }}>
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(p)}
+                        onChange={() => toggle(p)}
+                        style={{ accentColor: color, width: 14, height: 14, flexShrink: 0 }}
+                      />
+                      <span style={{ fontFamily: 'sans-serif', fontSize: '0.82rem', color: 'var(--theme-elevation-700)' }}>{p}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
-            {group.programs.map((p) => (
-              <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', padding: '3px 4px', borderRadius: '4px', background: selected.includes(p) ? (color === '#dc2626' ? '#fff1f2' : '#f0f9ff') : 'transparent' }}>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(p)}
-                  onChange={() => toggle(p)}
-                  style={{ accentColor: color, width: 14, height: 14, flexShrink: 0 }}
-                />
-                <span style={{ fontFamily: 'sans-serif', fontSize: '0.82rem', color: 'var(--theme-elevation-700)' }}>{p}</span>
-              </label>
-            ))}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -213,12 +254,12 @@ function GroupCard({ group }: { group: CourseGroup }) {
         </div>
       )}
 
-      {/* Obligatoria / Electiva — dos listas de checkboxes */}
+      {/* Obligatoria / Electiva — dos columnas con grupos colapsables */}
       <div>
         <label style={{ display: 'block', fontFamily: 'sans-serif', fontSize: '0.82rem', fontWeight: 600, marginBottom: '10px' }}>
           Tipo por programa
         </label>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
           <ProgramCheckboxList
             label="OBLIGATORIA EN"
             color="#1e293b"

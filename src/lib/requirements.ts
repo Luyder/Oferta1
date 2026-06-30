@@ -10,7 +10,11 @@ function normalize(s: string): string {
 }
 
 function matchesTrack(programNorm: string, track: string): boolean {
-  if (programNorm.includes('todos')) return true
+  if (programNorm === 'todos los programas') return true
+  if (programNorm === 'todos los posgrados') {
+    return ['profundizacion', 'investigacion', 'esp', 'doc'].includes(track)
+  }
+  if (programNorm === 'todos los pregrados') return false // pregrado only, never posgrado tabs
 
   switch (track) {
     case 'profundizacion':

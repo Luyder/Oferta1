@@ -6,7 +6,7 @@ export type ProgramGroup = {
 export const PROGRAM_GROUPS: ProgramGroup[] = [
   {
     label: 'General',
-    programs: ['Todos los programas', 'Todos los posgrados'],
+    programs: ['Todos los programas', 'Todos los pregrados', 'Todos los posgrados'],
   },
   {
     label: 'Pregrado — Licenciaturas',
