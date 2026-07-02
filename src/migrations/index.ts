@@ -5,6 +5,7 @@ import * as migration_20260625_200912_add_categories from './20260625_200912_add
 import * as migration_20260630_120000_add_program_split from './20260630_120000_add_program_split';
 import * as migration_20260630_160000_fix_program_tables from './20260630_160000_fix_program_tables';
 import * as migration_20260630_170000_fix_program_tables_v2 from './20260630_170000_fix_program_tables_v2';
+import * as migration_20260702_121600_add_feedback from './20260702_121600_add_feedback';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260630_170000_fix_program_tables_v2.up,
     down: migration_20260630_170000_fix_program_tables_v2.down,
     name: '20260630_170000_fix_program_tables_v2',
+  },
+  {
+    up: migration_20260702_121600_add_feedback.up,
+    down: migration_20260702_121600_add_feedback.down,
+    name: '20260702_121600_add_feedback',
   },
 ];

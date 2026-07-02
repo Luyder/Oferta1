@@ -10,6 +10,7 @@ import { Media } from './src/collections/Media'
 import { Courses } from './src/collections/Courses'
 import { Categories } from './src/collections/Categories'
 import { Professors } from './src/collections/Professors'
+import { Feedback } from './src/collections/Feedback'
 import { Users } from './src/collections/Users'
 import { migrations } from './src/migrations'
 
@@ -37,7 +38,7 @@ export default buildConfig({
       prefillOnly: false,
     },
   },
-  collections: [Courses, Professors, Categories, Media, Users],
+  collections: [Courses, Professors, Categories, Media, Feedback, Users],
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI ?? `file:${path.resolve(dirname, 'db.sqlite')}`,

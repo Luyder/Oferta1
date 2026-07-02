@@ -71,6 +71,7 @@ export interface Config {
     professors: Professor;
     categories: Category;
     media: Media;
+    feedback: Feedback;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     professors: ProfessorsSelect<false> | ProfessorsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    feedback: FeedbackSelect<false> | FeedbackSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -335,6 +337,26 @@ export interface Professor {
   createdAt: string;
 }
 /**
+ * Comentarios y sugerencias que dejan los estudiantes desde el sitio público (¿Falta algo o hay algo incorrecto?).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback".
+ */
+export interface Feedback {
+  id: number;
+  message: string;
+  /**
+   * Ruta desde la que se envió el comentario.
+   */
+  page?: string | null;
+  /**
+   * Correo o nombre que dejó quien comentó, si lo dio.
+   */
+  contact?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -374,6 +396,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'feedback';
+        value: number | Feedback;
       } | null)
     | ({
         relationTo: 'users';
@@ -522,6 +548,17 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback_select".
+ */
+export interface FeedbackSelect<T extends boolean = true> {
+  message?: T;
+  page?: T;
+  contact?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
