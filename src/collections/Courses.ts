@@ -47,6 +47,16 @@ export const Courses: CollectionConfig = {
       admin: { description: 'Si el nombre tiene dos líneas, escribe la segunda aquí' },
     },
     {
+      name: 'professor',
+      type: 'relationship',
+      label: 'Profesor/es',
+      relationTo: 'professors',
+      hasMany: true,
+      admin: {
+        description: 'Puedes agregar más de un profesor. Escribe para buscar y añade los que dicten el curso.',
+      },
+    },
+    {
       name: 'category',
       type: 'select',
       label: 'Categoría',
@@ -213,12 +223,6 @@ export const Courses: CollectionConfig = {
       type: 'upload',
       label: 'Foto del curso',
       relationTo: 'media',
-    },
-    {
-      name: 'professor',
-      type: 'relationship',
-      label: 'Profesor/a',
-      relationTo: 'professors',
     },
     // --- Estado ---
     {

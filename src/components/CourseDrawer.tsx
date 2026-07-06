@@ -77,11 +77,19 @@ function SectionBlock({ section, index, total }: { section: CourseSection; index
           ))}
         </div>
       )}
-      {/* Per-section professor */}
-      {section.professor && (
-        <p className="pl-1 font-mono text-xs text-neutral-600">
-          {section.professor.name}{section.professor.rank ? ` · ${section.professor.rank}` : ''}
-        </p>
+      {/* Per-section professors — enlazan a la página de cada profesor */}
+      {section.professors && section.professors.length > 0 && (
+        <div className="flex flex-wrap gap-x-3 gap-y-1 pl-1">
+          {section.professors.map((prof) => (
+            <a
+              key={prof.id}
+              href={`/profes?profe=${encodeURIComponent(String(prof.id))}`}
+              className="font-mono text-xs text-neutral-600 underline decoration-facu-green decoration-2 underline-offset-2 transition-colors hover:text-black"
+            >
+              {prof.name}{prof.rank ? ` · ${prof.rank}` : ''}
+            </a>
+          ))}
+        </div>
       )}
     </div>
   )

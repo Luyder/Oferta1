@@ -43,15 +43,16 @@ function normTitle(t: string) {
   return t.trim().toUpperCase()
 }
 
-function extractProfessor(d: RawDoc): CourseSection['professor'] {
+function extractProfessors(d: RawDoc): CourseSection['professors'] {
   const p = d.professor
-  if (p && typeof p === 'object' && 'name' in p) {
-    return {
-      name: (p as { name: string }).name,
-      rank: (p as { rank?: string }).rank ?? '',
-    }
-  }
-  return null
+  const arr = Array.isArray(p) ? p : p ? [p] : []
+  return arr
+    .filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === 'object' && 'name' in x)
+    .map((x) => ({
+      id: (x as { id: string | number }).id,
+      name: (x as { name: string }).name,
+      rank: ((x as { rank?: string }).rank ?? '') as string,
+    }))
 }
 
 function extractImage(d: RawDoc): CourseData['image'] {
@@ -74,7 +75,7 @@ export function groupCourses(docs: RawDoc[]): CourseData[] {
     const section: CourseSection = {
       nrc: d.nrc ?? null,
       scheduleSlots: (d.scheduleSlots as CourseSection['scheduleSlots']) ?? null,
-      professor: extractProfessor(d),
+      professors: extractProfessors(d),
     }
 
     if (seen.has(key)) {

@@ -1,11 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import ProfessorDrawer, { type ProfessorData } from './ProfessorDrawer'
 
 export default function ProfessorsGrid({ professors }: { professors: ProfessorData[] }) {
   const [selected, setSelected] = useState<ProfessorData | null>(null)
+
+  // Abrir automáticamente el profesor indicado en la URL (?profe=<id>),
+  // p. ej. al llegar desde el enlace de un curso.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('profe')
+    if (!wanted) return
+    const match = professors.find((p) => String(p.id) === wanted)
+    if (match) setSelected(match)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>

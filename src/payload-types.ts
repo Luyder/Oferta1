@@ -133,6 +133,10 @@ export interface Course {
    * Si el nombre tiene dos líneas, escribe la segunda aquí
    */
   titleLine2?: string | null;
+  /**
+   * Puedes agregar más de un profesor. Escribe para buscar y añade los que dicten el curso.
+   */
+  professor?: (number | Professor)[] | null;
   category: 'pregrado' | 'posgrado';
   programType: 'LIC' | 'MS' | 'ESP' | 'DOC';
   /**
@@ -238,7 +242,6 @@ export interface Course {
       )[]
     | null;
   image?: (number | null) | Media;
-  professor?: (number | null) | Professor;
   /**
    * Desmarca si el curso NO se oferta en 2026-1
    */
@@ -251,18 +254,35 @@ export interface Course {
   createdAt: string;
 }
 /**
- * Etiquetas temáticas para filtrar cursos por interés (ej: Inclusión, Tecnología, Primera infancia). Se muestran como filtros en las páginas de cursos.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "professors".
  */
-export interface Category {
+export interface Professor {
   id: number;
   name: string;
   /**
-   * Las categorías con menor número aparecen primero en los filtros.
+   * Ej: Profesor Titular, Investigadora, Docente de cátedra…
    */
-  order?: number | null;
+  rank?: string | null;
+  /**
+   * Breve presentación del/la profesor/a.
+   */
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  photo?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -304,35 +324,18 @@ export interface Media {
   };
 }
 /**
+ * Etiquetas temáticas para filtrar cursos por interés (ej: Inclusión, Tecnología, Primera infancia). Se muestran como filtros en las páginas de cursos.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "professors".
+ * via the `definition` "categories".
  */
-export interface Professor {
+export interface Category {
   id: number;
   name: string;
   /**
-   * Ej: Profesor Titular, Investigadora, Docente de cátedra…
+   * Las categorías con menor número aparecen primero en los filtros.
    */
-  rank?: string | null;
-  /**
-   * Breve presentación del/la profesor/a.
-   */
-  bio?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  photo?: (number | null) | Media;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -455,6 +458,7 @@ export interface CoursesSelect<T extends boolean = true> {
   title?: T;
   titleNormalized?: T;
   titleLine2?: T;
+  professor?: T;
   category?: T;
   programType?: T;
   subProgram?: T;
@@ -479,7 +483,6 @@ export interface CoursesSelect<T extends boolean = true> {
   obligatoriaEn?: T;
   electivaEn?: T;
   image?: T;
-  professor?: T;
   active?: T;
   order?: T;
   updatedAt?: T;

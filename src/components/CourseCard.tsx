@@ -5,10 +5,16 @@ import { requirementsForTrack } from '@/lib/requirements'
 
 export type ScheduleSlot = { day: string; startTime: string; endTime: string }
 
+export type CourseProfessorRef = {
+  id: string | number
+  name: string
+  rank?: string | null
+}
+
 export type CourseSection = {
   nrc?: string | null
   scheduleSlots?: ScheduleSlot[] | null
-  professor?: { name: string; rank: string } | null
+  professors?: CourseProfessorRef[] | null
 }
 
 export type CourseData = {

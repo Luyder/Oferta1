@@ -136,13 +136,17 @@ export default function ProfessorDrawer({ professor, onClose }: Props) {
                   <p className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral-400">Pregrado</p>
                   <div className="flex flex-col gap-2">
                     {pregrado.map(c => (
-                      <div key={c.id} className="flex items-start gap-3 rounded-xl bg-neutral-50 px-4 py-3">
+                      <a
+                        key={c.id}
+                        href={`/${c.category}?curso=${encodeURIComponent(c.title)}`}
+                        className="flex items-start gap-3 rounded-xl bg-neutral-50 px-4 py-3 transition-colors hover:bg-facu-green/20"
+                      >
                         <span className="mt-0.5 shrink-0 rounded-full bg-facu-green px-2 py-0.5 font-display text-[10px] font-black tracking-widest text-black">
                           {c.programType}
                         </span>
                         <p className="font-display text-sm font-bold leading-snug text-black">{c.title}</p>
                         {c.code && <span className="ml-auto shrink-0 font-mono text-xs text-neutral-400">{c.code}</span>}
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>
@@ -152,13 +156,17 @@ export default function ProfessorDrawer({ professor, onClose }: Props) {
                   <p className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral-400">Posgrado</p>
                   <div className="flex flex-col gap-2">
                     {posgrado.map(c => (
-                      <div key={c.id} className="flex items-start gap-3 rounded-xl bg-neutral-50 px-4 py-3">
+                      <a
+                        key={c.id}
+                        href={`/${c.category}?curso=${encodeURIComponent(c.title)}`}
+                        className="flex items-start gap-3 rounded-xl bg-neutral-50 px-4 py-3 transition-colors hover:bg-neutral-100"
+                      >
                         <span className="mt-0.5 shrink-0 rounded-full bg-black px-2 py-0.5 font-display text-[10px] font-black tracking-widest text-white">
                           {c.programType}
                         </span>
                         <p className="font-display text-sm font-bold leading-snug text-black">{c.title}</p>
                         {c.code && <span className="ml-auto shrink-0 font-mono text-xs text-neutral-400">{c.code}</span>}
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>

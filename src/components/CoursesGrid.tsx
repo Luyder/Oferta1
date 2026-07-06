@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CourseCard, { type CourseData } from './CourseCard'
 import CourseDrawer from './CourseDrawer'
 import { requirementsForTrack } from '@/lib/requirements'
@@ -39,6 +39,18 @@ export default function CoursesGrid({ courses, showFilters = true, track }: Prop
   const [modality, setModality] = useState<string>('all')
   const [activeTopics, setActiveTopics] = useState<string[]>([])
   const [requirement, setRequirement] = useState<string>('all')
+
+  // Abrir automáticamente el curso indicado en la URL (?curso=<nombre>),
+  // p. ej. al llegar desde el enlace de un profesor.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const wanted = params.get('curso')
+    if (!wanted) return
+    const key = wanted.trim().toUpperCase()
+    const match = courses.find((c) => c.title.trim().toUpperCase() === key)
+    if (match) setSelected(match)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Modalidades y categorías disponibles según los cursos presentes.
   const modalities = useMemo(() => {

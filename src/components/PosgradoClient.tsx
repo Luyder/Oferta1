@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CoursesGrid from './CoursesGrid'
 import type { CourseData } from './CourseCard'
 
@@ -15,6 +15,17 @@ type Section = {
 
 export default function PosgradoClient({ sections }: { sections: Section[] }) {
   const [active, setActive] = useState(sections[0]?.key ?? '')
+
+  // Si llegamos con ?curso=<nombre> (enlace desde un profesor), abrir la
+  // pestaña que contiene ese curso para que su tarjeta/drawer sea visible.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('curso')
+    if (!wanted) return
+    const key = wanted.trim().toUpperCase()
+    const section = sections.find(s => s.courses.some(c => c.title.trim().toUpperCase() === key))
+    if (section) setActive(section.key)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const current = sections.find(s => s.key === active) ?? sections[0]
 

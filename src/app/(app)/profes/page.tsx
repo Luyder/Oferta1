@@ -17,18 +17,26 @@ export default async function ProfesPage() {
   // Build a map: professorId → list of courses (deduplicated by title)
   const coursesByProf = new Map<string, Map<string, ProfessorData['courses'][0]>>()
   for (const course of courseDocs) {
-    if (!course.professor) continue
-    const profId = String(typeof course.professor === 'object' ? (course.professor as { id: unknown }).id : course.professor)
-    if (!coursesByProf.has(profId)) coursesByProf.set(profId, new Map())
-    const titleKey = course.title.trim().toUpperCase()
-    if (!coursesByProf.get(profId)!.has(titleKey)) {
-      coursesByProf.get(profId)!.set(titleKey, {
-        id: course.id,
-        title: course.title,
-        code: course.code ?? null,
-        category: course.category,
-        programType: course.programType,
-      })
+    // `professor` ahora es una relación múltiple → puede ser lista.
+    const rawProfs = Array.isArray(course.professor)
+      ? course.professor
+      : course.professor
+        ? [course.professor]
+        : []
+    for (const rawProf of rawProfs) {
+      if (!rawProf) continue
+      const profId = String(typeof rawProf === 'object' ? (rawProf as { id: unknown }).id : rawProf)
+      if (!coursesByProf.has(profId)) coursesByProf.set(profId, new Map())
+      const titleKey = course.title.trim().toUpperCase()
+      if (!coursesByProf.get(profId)!.has(titleKey)) {
+        coursesByProf.get(profId)!.set(titleKey, {
+          id: course.id,
+          title: course.title,
+          code: course.code ?? null,
+          category: course.category,
+          programType: course.programType,
+        })
+      }
     }
   }
 
